@@ -11,6 +11,12 @@
     return '<option value="">Elige una cuenta del equipo</option>'+[...accounts()].map(([uid,u])=>`<option value="${esc(uid)}" ${uid===selected?'selected':''}>${esc(nameOf(u.email))}${ADMINS.includes(String(u.email).toLowerCase())?' · Administrador':''}${uid===cloud.user.uid?' · Mi cuenta':''}</option>`).join('');
   }
   function scheduleDates(values) {
+    if(values.plan==='custom') {
+      const dates=[...new Set(values.dates||[])].sort();
+      if(!dates.length)throw new Error('days');
+      if(dates.length>62||dates.some(date=>!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(new Date(date+'T12:00:00').getTime())||localDate(new Date(date+'T12:00:00'))!==date))throw new Error('invalid');
+      return dates;
+    }
     if(!/^\d{4}-\d{2}-\d{2}$/.test(values.date||'')) throw new Error('invalid');
     const start=new Date(values.date+'T12:00:00');
     if(!Number.isFinite(start.getTime())||localDate(start)!==values.date) throw new Error('invalid');
@@ -68,15 +74,16 @@
       <details><summary style="cursor:pointer;padding:10px 0">Revisar y confirmar</summary><form class="web-request-form" style="display:grid;gap:10px;margin-top:10px">
       <label>Asignar a<select name="assignee" required>${accountOptions()}</select></label>
       <p class="hint">Puedes elegir cualquier cuenta registrada, incluidos los administradores.</p>
-      <label>Fecha de inicio<input name="date" type="date" value="${esc(r.date)}" required></label>
-      <label>Período<select name="plan"><option value="once">Un solo servicio</option>${r.service==='Hotel'?'':'<option value="week">Una semana (7 días)</option><option value="fortnight">Quince días</option><option value="month">Un mes desde la fecha de inicio</option>'}</select></label>
+      <label>Cómo elegir las fechas<select name="plan">${r.service==='Hotel'?'':'<option value="custom">Marcar fechas en el calendario</option>'}<option value="once">Un solo servicio</option>${r.service==='Hotel'?'':'<option value="week">Una semana (7 días)</option><option value="fortnight">Quince días</option><option value="month">Un mes desde la fecha de inicio</option>'}</select></label>
+      <label class="request-start-date">Fecha de inicio<input name="date" type="date" value="${esc(r.date)}" required></label>
+      <div class="request-calendar" ${r.service==='Hotel'?'hidden':''}></div>
       <fieldset class="request-weekdays" hidden style="border:1px solid #e6dba9;border-radius:12px;padding:12px"><legend>Días de paseo</legend><div style="display:flex;flex-wrap:wrap;gap:10px">${[[1,'Lun'],[2,'Mar'],[3,'Mié'],[4,'Jue'],[5,'Vie'],[6,'Sáb'],[0,'Dom']].map(([n,label])=>`<label style="display:flex;align-items:center;gap:5px;min-height:40px"><input type="checkbox" style="width:18px;height:18px;min-height:0" name="days" value="${n}" ${n===new Date(r.date+'T12:00:00').getDay()?'checked':''}>${label}</label>`).join('')}</div></fieldset>
       <label>Hora acordada<input name="time" type="time" required></label>
       <label>Duración en minutos<input name="minutes" type="number" min="1" max="1440" value="60" required></label>
       <label>Precio por ${r.service==='Hotel'?'noche':'servicio'} ($)<input name="price" type="number" min="0" step="1" required></label>
       ${r.service==="Hotel"?`<label>Noches acordadas<input name="nights" type="number" min="1" max="365" value="1" required></label>`:""}<p class="hint request-plan-summary" role="status"></p><p class="hint">Se guardarán las fechas en la agenda de la cuenta que elijas. Coordina con el cliente antes de confirmar.</p>
       <button type="submit" class="btn">Confirmar y agendar</button></form></details>
-      <button type="button" class="btn secondary small" style="margin-top:10px">No aceptar solicitud</button><p class="hint web-request-status" role="status"></p>`;
+      <button type="button" class="btn secondary small request-decline" style="margin-top:10px">No aceptar solicitud</button><p class="hint web-request-status" role="status"></p>`;
       const whatsapp=replyLink(r);
       if(whatsapp) {
         const link=document.createElement('a');
@@ -91,15 +98,40 @@
         card.insertBefore(hint,card.querySelector('details'));
       }
       const form=card.querySelector('form');
-      const readValues=()=>{const fields=new FormData(form);return {...Object.fromEntries(fields),days:fields.getAll('days')};};
+      const chosenDates=new Set([r.date]);
+      let calendarMonth=new Date(r.date+'T12:00:00');calendarMonth.setDate(1);
+      const calendar=form.querySelector('.request-calendar');
+      const readValues=()=>{const fields=new FormData(form);return {...Object.fromEntries(fields),days:fields.getAll('days'),dates:[...chosenDates]};};
       const preview=()=>{
-        form.querySelector('.request-weekdays').hidden=form.elements.plan.value==='once';
+        const mode=form.elements.plan.value;
+        form.querySelector('.request-weekdays').hidden=['once','custom'].includes(mode);
+        calendar.hidden=mode!=='custom';
+        form.querySelector('.request-start-date').hidden=mode==='custom';
+        form.elements.date.required=mode!=='custom';
         const line=form.querySelector('.request-plan-summary');
-        try{const dates=scheduleDates(readValues());const units=r.service==='Hotel'?Math.max(1,+form.elements.nights.value||1):dates.length;line.textContent=`${dates.length} servicio(s): del ${dates[0]} al ${dates[dates.length-1]}. Total acordado: ${money(units*(+form.elements.price.value||0))}.`;}catch{line.textContent='Selecciona al menos un día de paseo dentro del período.';}
+        try{const dates=scheduleDates(readValues());const units=r.service==='Hotel'?Math.max(1,+form.elements.nights.value||1):dates.length;line.textContent=`${dates.length} servicio(s): del ${dates[0]} al ${dates[dates.length-1]}. Total acordado: ${money(units*(+form.elements.price.value||0))}.`;}catch{line.textContent='Selecciona al menos una fecha o un día de paseo.';}
       };
+      const drawCalendar=()=>{
+        const year=calendarMonth.getFullYear(),month=calendarMonth.getMonth();
+        const offset=(new Date(year,month,1,12).getDay()+6)%7;
+        const length=new Date(year,month+1,0,12).getDate();
+        let cells='<span aria-hidden="true"></span>'.repeat(offset);
+        for(let day=1;day<=length;day++) {
+          const date=localDate(new Date(year,month,day,12));
+          cells+=`<button type="button" data-pick-date="${date}" aria-label="${esc(new Date(year,month,day,12).toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}" aria-pressed="${chosenDates.has(date)}">${day}</button>`;
+        }
+        calendar.innerHTML=`<p class="hint" style="margin:0 0 10px">Marca los días acordados. Toca de nuevo una fecha para quitarla; puedes cambiar de mes.</p><div class="request-calendar-head"><button type="button" class="btn secondary small" data-month="-1" aria-label="Mes anterior">‹</button><strong>${esc(calendarMonth.toLocaleDateString('es-CL',{month:'long',year:'numeric'}))}</strong><button type="button" class="btn secondary small" data-month="1" aria-label="Mes siguiente">›</button></div><div class="request-calendar-grid">${['L','M','X','J','V','S','D'].map(d=>`<span class="request-calendar-weekday" aria-hidden="true">${d}</span>`).join('')}${cells}</div><p class="hint" style="overflow-wrap:anywhere">${chosenDates.size} fecha(s): ${esc([...chosenDates].sort().map(d=>d.split('-').reverse().join('/')).join(', '))}</p><button type="button" class="btn secondary small" data-clear-dates>Limpiar selección</button>`;
+      };
+      calendar.addEventListener('click',event=>{
+        const button=event.target.closest('button');if(!button||!calendar.contains(button))return;
+        if(button.dataset.month){calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+Number(button.dataset.month),1,12);drawCalendar();}
+        if(button.dataset.pickDate){const date=button.dataset.pickDate;if(chosenDates.has(date))chosenDates.delete(date);else if(chosenDates.size<62)chosenDates.add(date);else{toast('Puedes elegir hasta 62 fechas por solicitud.');return;}drawCalendar();preview();}
+        if(button.hasAttribute('data-clear-dates')){chosenDates.clear();drawCalendar();preview();}
+      });
+      drawCalendar();
       form.addEventListener('change',preview);form.addEventListener('input',preview);preview();
       form.addEventListener('submit', e=>{e.preventDefault();handle(r,card,'confirmed',readValues());});
-      card.querySelector('button[type=button]').addEventListener('click',()=>{if(confirm('¿Marcar esta solicitud como no aceptada?'))handle(r,card,'declined');});
+      card.querySelector('.request-decline').addEventListener('click',()=>{if(confirm('¿Marcar esta solicitud como no aceptada?'))handle(r,card,'declined');});
       panel.append(card);
     }
     document.getElementById('content').prepend(panel);
