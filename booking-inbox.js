@@ -2,6 +2,35 @@
 (() => {
   let requests = [], unsubscribe = null, currentUid = null, requestError = false;
   const busy = new Set();
+  function accounts() {
+    const result=new Map(Object.entries(cloud.users||{}).filter(([,u])=>u.email));
+    if(cloud.user) result.set(cloud.user.uid,{...(result.get(cloud.user.uid)||{}),email:cloud.user.email});
+    return result;
+  }
+  function accountOptions(selected='') {
+    return '<option value="">Elige una cuenta del equipo</option>'+[...accounts()].map(([uid,u])=>`<option value="${esc(uid)}" ${uid===selected?'selected':''}>${esc(nameOf(u.email))}${ADMINS.includes(String(u.email).toLowerCase())?' · Administrador':''}${uid===cloud.user.uid?' · Mi cuenta':''}</option>`).join('');
+  }
+  function scheduleDates(values) {
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(values.date||'')) throw new Error('invalid');
+    const start=new Date(values.date+'T12:00:00');
+    if(!Number.isFinite(start.getTime())||localDate(start)!==values.date) throw new Error('invalid');
+    const period=values.plan||'once';
+    if(!['once','week','fortnight','month'].includes(period)) throw new Error('invalid');
+    if(period==='once')return [values.date];
+    let end=new Date(start);
+    if(period==='month') {
+      const last=new Date(start.getFullYear(),start.getMonth()+2,0).getDate();
+      end=new Date(start.getFullYear(),start.getMonth()+1,Math.min(start.getDate(),last),12);
+      end.setDate(end.getDate()-1);
+    } else end.setDate(end.getDate()+(period==='week'?6:14));
+    const selected=new Set((values.days||[]).map(Number));
+    const dates=[];
+    for(let day=new Date(start);day<=end;day.setDate(day.getDate()+1)) if(selected.has(day.getDay()))dates.push(localDate(day));
+    if(!dates.length)throw new Error('days');
+    return dates;
+  }
+  const originalUsersSnap=onUsersSnap;
+  onUsersSnap=function(snapshot){originalUsersSnap(snapshot);document.querySelectorAll('.web-request-form select[name=assignee]').forEach(select=>{const value=select.value;select.innerHTML=accountOptions(value);});};
   function replyLink(r) {
     let phone = String(r.phone || '').replace(/\D/g, '');
     if(phone.startsWith('00')) phone=phone.slice(2);
@@ -37,12 +66,16 @@
       const card=document.createElement('article'); card.className='walk';
       card.innerHTML=`<strong>${esc(r.dog)} · ${esc(r.service)}</strong><p class="hint">${esc(r.owner)} · ${esc(r.phone)}<br>${esc(r.area)} · ${esc(r.walker)}<br>Fecha solicitada: ${esc(r.date)} · ${esc(r.period)}</p>
       <details><summary style="cursor:pointer;padding:10px 0">Revisar y confirmar</summary><form class="web-request-form" style="display:grid;gap:10px;margin-top:10px">
-      <label>Fecha acordada<input name="date" type="date" value="${esc(r.date)}" required></label>
+      <label>Asignar a<select name="assignee" required>${accountOptions()}</select></label>
+      <p class="hint">Puedes elegir cualquier cuenta registrada, incluidos los administradores.</p>
+      <label>Fecha de inicio<input name="date" type="date" value="${esc(r.date)}" required></label>
+      <label>Período<select name="plan"><option value="once">Un solo servicio</option>${r.service==='Hotel'?'':'<option value="week">Una semana (7 días)</option><option value="fortnight">Quince días</option><option value="month">Un mes desde la fecha de inicio</option>'}</select></label>
+      <fieldset class="request-weekdays" hidden style="border:1px solid #e6dba9;border-radius:12px;padding:12px"><legend>Días de paseo</legend><div style="display:flex;flex-wrap:wrap;gap:10px">${[[1,'Lun'],[2,'Mar'],[3,'Mié'],[4,'Jue'],[5,'Vie'],[6,'Sáb'],[0,'Dom']].map(([n,label])=>`<label style="display:flex;align-items:center;gap:5px;min-height:40px"><input type="checkbox" style="width:18px;height:18px;min-height:0" name="days" value="${n}" ${n===new Date(r.date+'T12:00:00').getDay()?'checked':''}>${label}</label>`).join('')}</div></fieldset>
       <label>Hora acordada<input name="time" type="time" required></label>
       <label>Duración en minutos<input name="minutes" type="number" min="1" max="1440" value="60" required></label>
-      <label>Precio acordado ($)<input name="price" type="number" min="0" step="1" required></label>
-      ${r.service==="Hotel"?`<label>Noches acordadas<input name="nights" type="number" min="1" max="365" value="1" required></label>`:""}<p class="hint">Se agregará a la agenda de tu cuenta. La paseadora solicitada quedará anotada en el servicio. Confirma los detalles con el cliente antes de aceptar.</p>
-      <button type="submit" class="btn">Confirmar y agregar a mi agenda</button></form></details>
+      <label>Precio por ${r.service==='Hotel'?'noche':'servicio'} ($)<input name="price" type="number" min="0" step="1" required></label>
+      ${r.service==="Hotel"?`<label>Noches acordadas<input name="nights" type="number" min="1" max="365" value="1" required></label>`:""}<p class="hint request-plan-summary" role="status"></p><p class="hint">Se guardarán las fechas en la agenda de la cuenta que elijas. Coordina con el cliente antes de confirmar.</p>
+      <button type="submit" class="btn">Confirmar y agendar</button></form></details>
       <button type="button" class="btn secondary small" style="margin-top:10px">No aceptar solicitud</button><p class="hint web-request-status" role="status"></p>`;
       const whatsapp=replyLink(r);
       if(whatsapp) {
@@ -57,7 +90,15 @@
         hint.textContent='Mensaje preparado para '+r.walker+'. Se abre desde el WhatsApp de quien responda; podrás revisarlo antes de enviarlo.';
         card.insertBefore(hint,card.querySelector('details'));
       }
-      card.querySelector('form').addEventListener('submit', e=>{e.preventDefault();handle(r,card,'confirmed',Object.fromEntries(new FormData(e.target)));});
+      const form=card.querySelector('form');
+      const readValues=()=>{const fields=new FormData(form);return {...Object.fromEntries(fields),days:fields.getAll('days')};};
+      const preview=()=>{
+        form.querySelector('.request-weekdays').hidden=form.elements.plan.value==='once';
+        const line=form.querySelector('.request-plan-summary');
+        try{const dates=scheduleDates(readValues());const units=r.service==='Hotel'?Math.max(1,+form.elements.nights.value||1):dates.length;line.textContent=`${dates.length} servicio(s): del ${dates[0]} al ${dates[dates.length-1]}. Total acordado: ${money(units*(+form.elements.price.value||0))}.`;}catch{line.textContent='Selecciona al menos un día de paseo dentro del período.';}
+      };
+      form.addEventListener('change',preview);form.addEventListener('input',preview);preview();
+      form.addEventListener('submit', e=>{e.preventDefault();handle(r,card,'confirmed',readValues());});
       card.querySelector('button[type=button]').addEventListener('click',()=>{if(confirm('¿Marcar esta solicitud como no aceptada?'))handle(r,card,'declined');});
       panel.append(card);
     }
@@ -71,8 +112,11 @@
       // Flush unrelated edits before reading and merging the authoritative record.
       await flushAll();
       const uid=cloud.user.uid, email=cloud.user.email;
+      const target=status==='confirmed'?values.assignee:uid;
+      if(status==='confirmed'&&!accounts().has(target))throw new Error('assignee');
+      const dates=status==='confirmed'?scheduleDates(values):[];
       const requestRef=cloud.fs.collection('bookingRequests').doc(r.id);
-      const userRef=cloud.fs.collection('users').doc(uid);
+      const userRef=cloud.fs.collection('users').doc(target);
       await cloud.fs.runTransaction(async tx=>{
         const requestSnap=await tx.get(requestRef);
         const userSnap=status==='confirmed' ? await tx.get(userRef) : null;
@@ -85,21 +129,25 @@
           const data=normalizedDb(JSON.parse(userSnap?.data()?.json||'{}'));
           let customer=data.clients.find(c=>c.phone===request.phone && c.owner===request.owner);
           if(!customer) {
-            customer={id:'web-client:'+r.id,owner:request.owner,phone:request.phone,area:request.area,address:'',unit:'',dogs:[request.dog],monthlyFee:0,monthlyWalks:0,noCommission:false,note:'Solicitud web'};
+            customer={id:'web-client:'+r.id,owner:request.owner,phone:request.phone,area:request.area,address:'',unit:'',dogs:[request.dog],monthlyFee:0,monthlyWalks:0,noCommission:ADMINS.includes(String(accounts().get(target).email).toLowerCase()),note:'Solicitud web'};
             data.clients.push(customer);
           } else if(!customer.dogs.includes(request.dog)) customer.dogs.push(request.dog);
-          const id='web-walk:'+r.id;
-          if(!data.walks.some(w=>w.id===id)) data.walks.push({id,clientId:customer.id,dog:request.dog,date:values.date,time:values.time,
+          const assignedEmail=accounts().get(target).email;
+          for(const date of dates) {
+          const id='web-walk:'+r.id+':'+date;
+          const duplicate=data.walks.some(w=>w.id===id||(w.status!=='Cancelado'&&w.clientId===customer.id&&w.dog===request.dog&&w.date===date&&w.time===values.time&&w.service===(request.service==='Guardería'?'Pet sitter':request.service)));
+          if(!duplicate) data.walks.push({id,clientId:customer.id,dog:request.dog,date,time:values.time,
             service:request.service==='Guardería'?'Pet sitter':request.service,nights:request.service==="Hotel"?+values.nights:1,minutes:+values.minutes,price:+values.price,
-            status:'Agendado',paid:false,note:'Solicitud web · Paseadora solicitada: '+request.walker,bookingRequestId:r.id});
-          tx.set(userRef,{json:JSON.stringify(data),updatedAt:Date.now(),by:email,email},{merge:true});
-          handled.walkId=id;
+            status:'Agendado',paid:false,note:'Solicitud web · Asignado a: '+nameOf(assignedEmail)+' · Paseadora solicitada: '+request.walker,bookingRequestId:r.id});
+          }
+          tx.set(userRef,{json:JSON.stringify(data),updatedAt:Date.now(),by:email,email:assignedEmail},{merge:true});
+          handled.walkId='web-walk:'+r.id+':'+dates[0];
         }
         tx.update(requestRef,handled);
       });
-      toast(status==='confirmed'?'Solicitud agregada a tu agenda.':'Solicitud marcada como no aceptada.');
+      toast(status==='confirmed'?dates.length+' servicio(s) agendados en la cuenta seleccionada.':'Solicitud marcada como no aceptada.');
     } catch(error) {
-      message.textContent=error.message==='handled'?'Esta solicitud ya fue atendida. Actualiza la página.':'No se pudo guardar. La solicitud sigue pendiente; inténtalo de nuevo.';
+      message.textContent=error.message==='handled'?'Esta solicitud ya fue atendida. Actualiza la página.':error.message==='days'?'Elige al menos un día de paseo.':error.message==='assignee'?'Elige una cuenta del equipo.':'No se pudo guardar. La solicitud sigue pendiente; inténtalo de nuevo.';
       card.querySelectorAll('button').forEach(b=>b.disabled=false);
     } finally {busy.delete(r.id);}
   }
