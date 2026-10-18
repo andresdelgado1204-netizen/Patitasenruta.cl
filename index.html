@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Patitas en Ruta</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+:root{--bg:#f6f0c9;--surface:#fefbec;--field:#ffffff;--ink:#31163d;--muted:#7d6c7d;--line:#e4dbaf;--accent:#371847;--accent-ink:#fff;--ok:#1f7a4d;--ok-bg:#dff1dc;--wait-bg:#ffe9a8;--warn:#b3392a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1228;--field:#1c1228;--surface:#281a38;--ink:#f1e9fb;--muted:#b7a6cc;--line:#3a2850;--accent:#c8a2ff;--accent-ink:#1c1228;--ok:#7fd6a2;--ok-bg:#1f3a2c;--wait-bg:#4a3a14;--warn:#ff9a86;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1c1228;--field:#1c1228;--surface:#281a38;--ink:#f1e9fb;--muted:#b7a6cc;--line:#3a2850;--accent:#c8a2ff;--accent-ink:#1c1228;--ok:#7fd6a2;--ok-bg:#1f3a2c;--wait-bg:#4a3a14;--warn:#ff9a86;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.45 Nunito,system-ui,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px 120px}
+.brand{font-weight:900;font-size:1.7rem;letter-spacing:-.02em;margin:0}
+.tag{color:var(--muted);margin:0 0 16px}
+h2{font-size:1.15rem;font-weight:800;margin:0 0 10px}
+.day{font-size:.95rem;font-weight:800;margin:14px 0 0;text-transform:capitalize;color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 14px}
+.stat span{color:var(--muted);font-size:.85rem}
+.stat b{display:block;font-size:1.6rem;font-weight:900}
+form,.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);gap:3px}
+.full{grid-column:1/-1}
+input,select,textarea{font:600 16px Nunito,sans-serif;color:var(--ink);background:var(--field);border:1.5px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-height:46px}
+textarea{resize:vertical}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;background:var(--accent);color:var(--accent-ink);font:800 .95rem Nunito,sans-serif;padding:11px 16px;border-radius:12px;cursor:pointer;min-height:44px;text-decoration:none}
+.btn.ghost{background:var(--field);color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:7px 12px;font-size:.85rem;min-height:40px}
+.btn.danger{color:var(--warn)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.day+.row,h2+.row{border-top:0}
+.row b{font-weight:800}
+.meta{color:var(--muted);font-size:.9rem;margin:0}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.acts select{width:auto}
+.pill{font-size:.8rem;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--ok-bg);color:var(--ok)}
+.empty{color:var(--muted);text-align:center;padding:14px 4px;margin:0}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:2px;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+.bar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;border:0;background:transparent;color:var(--muted);font:800 .72rem Nunito,sans-serif;padding:6px 0;border-radius:14px;min-height:52px;cursor:pointer}
+.bar .ic{font-size:1.4rem;line-height:1}
+.bar button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+:root:root:root{--bg:#f6f0c9;--surface:#fefbec;--field:#ffffff;--ink:#31163d;--muted:#7d6c7d;--line:#e4dbaf;--accent:#371847;--accent-ink:#fff;--ok:#1f7a4d;--ok-bg:#dff1dc;--wait-bg:#ffe9a8;--warn:#b3392a;color-scheme:light}
+@media (min-width:760px){.wrap{max-width:980px}.stats{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="brand">🐾 Patitas en Ruta</h1>
+  <p class="tag">Agenda, clientes y pagos en un solo lugar</p>
+  <main id="view"></main>
+</div>
+<nav class="bar" id="tabs" role="tablist"></nav>
+<script>
+(function(){
+var KEY="patitas-v1",S={clients:[],walks:[],bank:"",pin:""},tab="resumen",unlocked=false,armed="";
+var SV=[["Paseo",6000,45,"paseo"],["Trekking",12000,120,"trekking"],["Hotel",20000,0,"hotel"],["Pet sitter",8000,60,"sitter"]];
+var METHODS=["Efectivo","Transferencia","Tarjeta","Mercado Pago"];
+var TABS=[["resumen","🏡","Resumen"],["agenda","📅","Agenda"],["clientes","🐕","Clientes"],["cobros","💵","Cobros"],["seguridad","🔐","Seguridad"]];
+try{var r=localStorage.getItem(KEY);if(r){var p=JSON.parse(r);if(p&&p.clients&&p.walks)S=Object.assign(S,p);}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function $(i){return document.getElementById(i);}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function pad(n){return String(n).padStart(2,"0");}
+function fmt(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function today(){return fmt(new Date());}
+function parse(s){var a=s.split("-");return new Date(+a[0],+a[1]-1,+a[2]);}
+function money(n){return "$"+Number(n||0).toLocaleString("es-CL");}
+function dayLabel(s){var t=parse(s).toLocaleDateString("es-CL",{weekday:"long",day:"numeric",month:"long"});return s===today()?"Hoy, "+t:t;}
+function hp(s){var h=5381;s="patitas"+s;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return String(h);}
+function dates(s,mode){var o=[],d=parse(s),i;if(mode==="semanal"){for(i=0;i<8;i++)o.push(fmt(new Date(d.getFullYear(),d.getMonth(),d.getDate()+7*i)));}else if(mode==="lv"){var n=0,k=0;while(n<5&&k<14){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+k);if(x.getDay()%6!==0){o.push(fmt(x));n++;}k++;}}else o.push(s);return o;}
+function cl(id){return S.clients.find(function(c){return c.id===id;})||{dog:"(eliminado)",owner:"",phone:""};}
+function cmp(a,b){return (a.date+a.time).localeCompare(b.date+b.time);}
+function span(w){var p=w.time.split(":"),s=parse(w.date);s.setHours(+p[0],+p[1]);var e=new Date(s.getTime()+(w.mins||0)*60000),o={weekday:"short",day:"numeric",month:"short"};function hm(d){return pad(d.getHours())+":"+pad(d.getMinutes());}var sd=s.toLocaleDateString("es-CL",o);if(fmt(e)===w.date)return sd+", "+hm(s)+" a "+hm(e);return sd+" "+hm(s)+" a "+e.toLocaleDateString("es-CL",o)+" "+hm(e);}
+function el(t,a,k){var e=document.createElement(t);for(var x in (a||{})){var y=a[x];if(x==="class")e.className=y;else if(x==="text")e.textContent=y;else if(x.indexOf("on")===0)e.addEventListener(x.slice(2),y);else e.setAttribute(x,y);}(k||[]).forEach(function(c){if(c)e.appendChild(typeof c==="string"?document.createTextNode(c):c);});return e;}
+function fld(l,i,full){return el("label",{class:full?"full":""},[l,i]);}
+function panel(t){return el("section",{class:"panel"},[el("h2",{text:t})]);}
+function wa(c,msg,label){if(!c.phone)return null;return el("a",{class:"btn sm ghost",href:"https://wa.me/"+c.phone+"?text="+encodeURIComponent(msg),target:"_blank",rel:"noopener",text:label});}
+function comm(k){var d={paseo:1000,trekking:0,hotel:2000,sitter:2000};return S.comm&&S.comm[k]!=null?+S.comm[k]:d[k];}
+function cov(w){var c=S.clients.find(function(x){return x.id===w.cid;});return !!(c&&c.monthly>0&&(w.kind||"paseo")==="paseo");}
+function cmw(w){var k=w.kind||"paseo";return comm(k)*(k==="hotel"?(w.nights||1):1);}
+var cm_=today().slice(0,7);
+function go(t){tab=t;armed="";render();window.scrollTo(0,0);}
+function need(v){var P=panel("Agendar un servicio");P.appendChild(el("p",{class:"empty",text:"Primero agrega un cliente y su perro en la pestaña Clientes."}));P.appendChild(el("button",{class:"btn full",text:"Ir a Clientes",onclick:function(){go("clientes");}}));v.appendChild(P);}
+function copy(ta,m){ta.focus();ta.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}if(!ok&&navigator.clipboard){try{navigator.clipboard.writeText(ta.value);ok=true;}catch(e){}}m.textContent=ok?"Copiado.":"Mantén presionado el texto y elige Copiar.";}
+
+function render(){
+  var v=$("view"),nav=$("tabs");v.innerHTML="";nav.innerHTML="";
+  if(S.pin&&!unlocked){nav.style.display="none";return lock(v);}
+  nav.style.display="";
+  TABS.forEach(function(t){nav.appendChild(el("button",{role:"tab","aria-selected":String(t[0]===tab),onclick:function(){go(t[0]);}},[el("span",{class:"ic",text:t[1]}),el("span",{text:t[2]})]));});
+  ({resumen:resumen,agenda:agenda,clientes:clientes,cobros:cobros2,seguridad:seguridad})[tab](v);
+}
+function lock(v){
+  var P=panel("🔒 Ingresa tu PIN"),pi=el("input",{type:"password",inputmode:"numeric",maxlength:"4","aria-label":"PIN"}),m=el("p",{class:"meta",role:"status"});
+  var f=el("form",{onsubmit:function(e){e.preventDefault();if(hp(pi.value)===S.pin){unlocked=true;render();}else{m.textContent="PIN incorrecto. Intenta de nuevo.";pi.value="";}}},[pi,el("button",{class:"btn",type:"submit",text:"Entrar"})]);
+  P.appendChild(f);P.appendChild(m);v.appendChild(P);
+}
+function resumen(v){
+  var mes=today().slice(0,7);
+  var cob=S.walks.filter(function(w){return w.paid&&w.date.slice(0,7)===mes;}).reduce(function(s,w){return s+w.price;},0);
+  cob+=Object.keys(S.mp||{}).reduce(function(s,k){var a=k.split("|"),c=S.clients.find(function(x){return x.id===a[0];});return s+(c&&a[1]===mes?c.monthly||0:0);},0);var por=S.walks.filter(function(w){return w.done&&!w.paid&&!cov(w);}).reduce(function(s,w){return s+w.price;},0);
+  var hoy=S.walks.filter(function(w){return w.date===today();}).length;
+  v.appendChild(el("div",{class:"stats"},[
+    el("div",{class:"stat"},[el("span",{text:"🐾 Servicios hoy"}),el("b",{text:String(hoy)})]),
+    el("div",{class:"stat"},[el("span",{text:"🐕 Clientes"}),el("b",{text:String(S.clients.length)})]),
+    el("div",{class:"stat"},[el("span",{text:"💚 Cobrado este mes"}),el("b",{text:money(cob)})]),
+    el("div",{class:"stat"},[el("span",{text:"🧾 Por cobrar"}),el("b",{text:money(por)})])]));
+  var P=panel("📍 Próximos servicios");
+  var ws=S.walks.filter(function(w){return !w.done;}).sort(cmp).slice(0,4);
+  if(!ws.length)P.appendChild(el("p",{class:"empty",text:"Aún no hay servicios agendados. ¡Agrega el primero!"}));
+  ws.forEach(function(w){var c=cl(w.cid);P.appendChild(el("div",{class:"row"},[el("div",{},[el("b",{text:c.dog}),el("p",{class:"meta",text:span(w)+", "+w.svc})]),el("span",{class:"pill",text:money(w.price)})]));});
+  P.appendChild(el("button",{class:"btn full",style:"width:100%;margin-top:8px",text:"Agendar un servicio",onclick:function(){go(S.clients.length?"agenda":"clientes");}}));
+  v.appendChild(P);
+}
+function agenda(v){
+  if(!S.clients.length)return need(v);
+  var cs=el("select",{},S.clients.map(function(c){return el("option",{value:c.id,text:c.dog+" ("+c.owner+")"});}));
+  var sv=el("select",{},SV.map(function(s,i){return el("option",{value:i,text:s[0]});}));
+  var pr=el("input",{type:"number",min:"0",step:"500",required:"",inputmode:"numeric"});
+  var mi=el("input",{type:"number",min:"10",step:"5",required:"",inputmode:"numeric"});
+  var nt=el("input",{type:"number",min:"1",step:"1",value:"1",inputmode:"numeric"}),plt=el("span",{text:"Precio (CLP)"}),lm=fld("Minutos",mi),ln=fld("Noches",nt);ln.style.display="none";
+  function fill(){var s=SV[+sv.value],h=s[3]==="hotel";pr.value=s[1];mi.value=s[2]||60;mi.required=!h;plt.textContent=h?"Precio por noche (CLP)":"Precio (CLP)";lm.style.display=h?"none":"";ln.style.display=h?"":"none";}
+  sv.addEventListener("change",fill);fill();
+  var dt=el("input",{type:"date",value:today(),required:""}),tm=el("input",{type:"time",value:"10:00",required:""});
+  var rp=el("select",{},[el("option",{value:"una",text:"Solo una vez"}),el("option",{value:"semanal",text:"Cada semana, 8 semanas"}),el("option",{value:"lv",text:"5 días hábiles seguidos"})]);
+  var f=el("form",{onsubmit:function(e){e.preventDefault();var s=SV[+sv.value],h=s[3]==="hotel",nn=h?Math.max(1,+nt.value||1):1;dates(dt.value,rp.value).forEach(function(d){S.walks.push({id:uid(),cid:cs.value,svc:s[0],kind:s[3],nights:nn,date:d,time:tm.value,mins:h?nn*1440:+mi.value,price:+pr.value*nn,done:false,paid:false});});save();render();}},
+    [fld("Cliente y perro",cs,1),fld("Servicio",sv,1),fld("Fecha",dt),fld("Hora",tm),lm,ln,el("label",{},[plt,pr]),fld("Repetir",rp,1),el("button",{class:"btn full",type:"submit",text:"Agendar servicio"})]);
+  var A=panel("✨ Agendar un servicio");A.appendChild(f);v.appendChild(A);
+  var L=panel("📅 Agenda"),ws=S.walks.filter(function(w){return !w.done;}).sort(cmp),last="";
+  if(!ws.length)L.appendChild(el("p",{class:"empty",text:"Aún no hay servicios agendados. ¡Agrega el primero!"}));
+  ws.forEach(function(w){var c=cl(w.cid);
+    if(w.date!==last){last=w.date;L.appendChild(el("h3",{class:"day",text:dayLabel(w.date)}));}
+    L.appendChild(el("div",{class:"row"},[el("div",{},[el("b",{text:c.dog}),el("p",{class:"meta",text:"📅 "+span(w)}),el("p",{class:"meta",text:w.svc+", "+(w.kind==="hotel"?w.nights+" noche(s)":w.mins+" min")+", "+money(w.price)+(c.comuna?", "+c.comuna:"")})]),
+      el("div",{class:"acts"},[wa(c,"Hola! Te confirmo el servicio de "+c.dog+" ("+w.svc+"): "+span(w)+".","Confirmar"),
+        el("button",{class:"btn sm",text:"Hecho",onclick:function(){w.done=true;save();render();}}),
+        el("button",{class:"btn sm ghost danger",text:"Cancelar",onclick:function(){S.walks=S.walks.filter(function(x){return x!==w;});save();render();}})])]));});
+  v.appendChild(L);
+}
+function clientes(v){
+  var o=el("input",{required:"",autocomplete:"off"}),d=el("input",{required:"",autocomplete:"off"}),ph=el("input",{type:"tel",inputmode:"tel",placeholder:"56912345678"}),ad=el("input",{autocomplete:"off",placeholder:"Calle, número, depto"}),co=el("input",{autocomplete:"off",placeholder:"Ej: Providencia"}),mo=el("input",{type:"number",min:"0",step:"1000",inputmode:"numeric",placeholder:"0"}),n=el("textarea",{rows:"2"});
+  var f=el("form",{onsubmit:function(e){e.preventDefault();S.clients.push({id:uid(),owner:o.value.trim(),dog:d.value.trim(),phone:ph.value.replace(/\D/g,""),address:ad.value.trim(),comuna:co.value.trim(),monthly:+mo.value||0,notes:n.value.trim()});save();render();}},
+    [fld("Dueño",o),fld("Perro",d),fld("WhatsApp con código de país",ph,1),fld("Dirección",ad,1),fld("Comuna",co,1),fld("Mensualidad de paseos (CLP, opcional)",mo,1),fld("Notas: vacunas, alergias, comportamiento",n,1),el("button",{class:"btn full",type:"submit",text:"Guardar cliente"})]);
+  var A=panel("🐕 Nuevo cliente");A.appendChild(f);v.appendChild(A);
+  var L=panel("Mis clientes");
+  if(!S.clients.length)L.appendChild(el("p",{class:"empty",text:"Aún no hay clientes. Guarda el primero con la ficha de arriba."}));
+  S.clients.forEach(function(c){L.appendChild(el("div",{class:"row"},[el("div",{},[el("b",{text:c.dog}),el("p",{class:"meta",text:"Dueño: "+c.owner}),(c.address||c.comuna)?el("p",{class:"meta",text:"📍 "+[c.address,c.comuna].filter(Boolean).join(", ")}):null,c.monthly?el("p",{class:"meta",text:"Mensualidad de paseos: "+money(c.monthly)}):null,c.notes?el("p",{class:"meta",text:c.notes}):null]),
+    el("div",{class:"acts"},[wa(c,"Hola "+c.owner+"!","WhatsApp"),(c.address?el("a",{class:"btn sm ghost",href:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent([c.address,c.comuna].filter(Boolean).join(", ")),target:"_blank",rel:"noopener",text:"Mapa"}):null),el("button",{class:"btn sm ghost danger",text:"Eliminar",onclick:function(){S.clients=S.clients.filter(function(x){return x!==c;});S.walks=S.walks.filter(function(w){return w.cid!==c.id;});save();render();}})])]));});
+  v.appendChild(L);
+}
+function cobros(v){
+  var pend=S.walks.filter(function(w){return w.done&&!w.paid&&!cov(w);}).sort(cmp),tot=pend.reduce(function(s,w){return s+w.price;},0);
+  var B=panel("💵 Por cobrar: "+money(tot));
+  if(!pend.length)B.appendChild(el("p",{class:"empty",text:"No tienes cobros pendientes. Los servicios que marques como hechos aparecerán aquí."}));
+  pend.forEach(function(w){var c=cl(w.cid),ms=el("select",{"aria-label":"Medio de pago"},METHODS.map(function(m){return el("option",{value:m,text:m});}));
+    B.appendChild(el("div",{class:"row"},[el("div",{},[el("b",{text:c.owner||c.dog}),el("p",{class:"meta",text:c.dog+", "+w.date+", "+money(w.price)})]),
+      el("div",{class:"acts"},[wa(c,"Hola! Te cobro el servicio de "+c.dog+" del "+w.date+": "+money(w.price)+".","Cobrar"),ms,
+        el("button",{class:"btn sm",text:"Cobrado",onclick:function(){w.paid=true;w.method=ms.value;save();render();}})])]));});
+  v.appendChild(B);
+  
+  
+  
+  
+  
+  
+  var by={};Object.keys(S.mp||{}).forEach(function(k){var c=S.clients.find(function(x){return x.id===k.split("|")[0];});if(c&&c.monthly){by[S.mp[k]]=(by[S.mp[k]]||0)+c.monthly;}});S.walks.filter(function(w){return w.paid;}).forEach(function(w){var k=w.method||"Efectivo";by[k]=(by[k]||0)+w.price;});
+  var H=panel("Cobrado por medio de pago"),ks=Object.keys(by);
+  if(!ks.length)H.appendChild(el("p",{class:"empty",text:"Cuando registres cobros verás aquí cómo te pagan."}));
+  ks.forEach(function(k){H.appendChild(el("div",{class:"row"},[el("b",{text:k}),el("span",{class:"pill",text:money(by[k])})]));});
+  v.appendChild(H);
+}
+function cobros2(v){
+  var mes=cm_,mp=S.mp=S.mp||{},ks=[["paseo","Comisión paseo (CLP por servicio)"],["trekking","Comisión trekking (CLP por servicio)"],["hotel","Comisión hotel (CLP por noche)"],["sitter","Comisión pet sitter (CLP por servicio)"]],ci={};
+  var C=panel("⚙️ Comisión por servicio");
+  C.appendChild(el("p",{class:"meta",text:"Define el monto fijo que Patitas en Ruta descuenta por cada servicio. En hotel, se aplica por noche."}));
+  C.appendChild(el("div",{class:"grid",style:"margin:10px 0"},ks.map(function(k){ci[k[0]]=el("input",{type:"number",min:"0",step:"100",inputmode:"numeric",value:String(comm(k[0]))});return fld(k[1],ci[k[0]]);})));
+  C.appendChild(el("button",{class:"btn",text:"Guardar comisiones",onclick:function(){S.comm={};ks.forEach(function(k){S.comm[k[0]]=Math.max(0,+ci[k[0]].value||0);});save();render();}}));
+  v.appendChild(C);
+  var ws=S.walks.filter(function(w){return w.done&&w.date.slice(0,7)===mes;}),rows=[],bruto=0,cobr=0,com=0;
+  S.clients.forEach(function(c){
+    var mine=ws.filter(function(w){return w.cid===c.id;});if(!mine.length)return;
+    var lines={},total=0,paid=0,mk=c.id+"|"+mes,mens=c.monthly>0&&mine.some(function(w){return (w.kind||"paseo")==="paseo";});
+    mine.forEach(function(w){com+=cmw(w);var cv=cov(w),l=lines[w.svc]=lines[w.svc]||{n:0,t:0,cv:cv};l.n++;if(!cv){l.t+=w.price;total+=w.price;if(w.paid)paid+=w.price;}});
+    if(mens){total+=c.monthly;if(mp[mk])paid+=c.monthly;}
+    bruto+=total;cobr+=paid;rows.push({c:c,lines:lines,total:total,mens:mens,mk:mk});
+  });
+  function st(l,x){return el("div",{class:"stat"},[el("span",{text:l}),el("b",{text:x})]);}
+  v.appendChild(el("div",{class:"stats"},[st("🐾 Servicios realizados",String(ws.length)),st("💵 Cobro bruto",money(bruto)),st("➖ Comisión",money(com)),st("💚 Ingreso neto estimado",money(bruto-com)),st("✅ Cobrado",money(cobr)),st("🧾 Pendiente",money(bruto-cobr))]));
+  var inp=el("input",{type:"month",value:mes,"aria-label":"Mes"});
+  inp.addEventListener("change",function(){if(inp.value){cm_=inp.value;render();}});
+  var M=panel("🧾 Cobro del mes por cliente y servicio");M.appendChild(inp);
+  M.appendChild(el("p",{class:"meta",style:"margin-top:8px",text:"La mensualidad cubre los paseos; los otros servicios se cobran aparte. Los cancelados no se incluyen. En hotel se multiplica el precio y la comisión por el número de noches."}));
+  if(!rows.length)M.appendChild(el("p",{class:"empty",text:"Todavía no hay servicios realizados para este mes."}));
+  rows.forEach(function(r){
+    var kids=[el("b",{text:r.c.dog+" ("+r.c.owner+")"})];
+    if(r.mens)kids.push(el("p",{class:"meta",text:"Mensualidad de paseos: "+money(r.c.monthly)+(mp[r.mk]?" (cobrada, "+mp[r.mk]+")":" (pendiente)")}));
+    Object.keys(r.lines).forEach(function(k){var l=r.lines[k];kids.push(el("p",{class:"meta",text:k+" x"+l.n+": "+(l.cv?"incluido en la mensualidad":money(l.t))}));});
+    if(r.mens&&!mp[r.mk]){var ms=el("select",{"aria-label":"Medio de pago"},METHODS.map(function(m){return el("option",{value:m,text:m});}));
+      kids.push(el("div",{class:"acts",style:"margin-top:6px"},[wa(r.c,"Hola! Te cobro la mensualidad de paseos de "+r.c.dog+" ("+mes+"): "+money(r.c.monthly)+".","Cobrar"),ms,el("button",{class:"btn sm",text:"Mensualidad cobrada",onclick:function(){mp[r.mk]=ms.value;save();render();}})]));}
+    M.appendChild(el("div",{class:"row"},[el("div",{},kids),el("span",{class:"pill",text:money(r.total)})]));
+  });
+  v.appendChild(M);
+  cobros(v);
+}
+function seguridad(v){
+  var m1=el("p",{class:"meta",role:"status"}),pi=el("input",{type:"password",inputmode:"numeric",maxlength:"4",placeholder:"4 números","aria-label":"PIN nuevo"});
+  var P=panel("🔐 Bloqueo con PIN");
+  P.appendChild(el("p",{class:"meta",text:S.pin?"El PIN está activo y se pedirá al abrir la app.":"Protege tus datos con un PIN de 4 números. Es un bloqueo básico para que nadie curiosee, no un cifrado."}));
+  var ac=el("div",{class:"acts",style:"margin-top:8px"},[el("button",{class:"btn sm",text:S.pin?"Cambiar PIN":"Activar PIN",onclick:function(){if(!/^\d{4}$/.test(pi.value)){m1.textContent="El PIN debe tener 4 números.";return;}S.pin=hp(pi.value);unlocked=true;save();render();}})]);
+  if(S.pin)ac.appendChild(el("button",{class:"btn sm ghost",text:"Quitar PIN",onclick:function(){S.pin="";save();render();}}));
+  P.appendChild(el("div",{style:"margin-top:8px"},[pi]));P.appendChild(ac);P.appendChild(m1);v.appendChild(P);
+  var bk=JSON.parse(JSON.stringify(S));bk.pin="";
+  var t1=el("textarea",{rows:"3",readonly:"","aria-label":"Respaldo"});t1.value=JSON.stringify(bk);var m2=el("p",{class:"meta",role:"status"});
+  var R=panel("⬇️ Respaldo");R.appendChild(el("p",{class:"meta",text:"Tus datos viven solo en este teléfono. Copia este texto y guárdalo en Notas o envíatelo por WhatsApp."}));
+  R.appendChild(t1);R.appendChild(el("div",{class:"acts",style:"margin-top:8px"},[el("button",{class:"btn sm",text:"Copiar respaldo",onclick:function(){copy(t1,m2);}})]));R.appendChild(m2);v.appendChild(R);
+  var t2=el("textarea",{rows:"3","aria-label":"Pegar respaldo",placeholder:"Pega aquí el respaldo"}),m3=el("p",{class:"meta",role:"status"});
+  var I=panel("⬆️ Importar");
+  I.appendChild(t2);I.appendChild(el("div",{class:"acts",style:"margin-top:8px"},[el("button",{class:"btn sm",text:armed==="imp"?"Toca otra vez para reemplazar todo":"Importar respaldo",onclick:function(){
+    var q;try{q=JSON.parse(t2.value);}catch(e){}
+    if(!q||!Array.isArray(q.clients)||!Array.isArray(q.walks)){m3.textContent="Ese texto no es un respaldo válido.";return;}
+    if(armed!=="imp"){armed="imp";render();return;}
+    S={clients:q.clients,walks:q.walks,bank:q.bank||"",pin:S.pin,comm:q.comm,mp:q.mp||{}};save();armed="";tab="resumen";render();}})]));I.appendChild(m3);v.appendChild(I);
+  var t3=el("textarea",{rows:"4",readonly:"","aria-label":"Agenda en texto"}),m4=el("p",{class:"meta",role:"status"});
+  t3.value=S.walks.filter(function(w){return !w.done;}).sort(cmp).map(function(w){var c=cl(w.cid);return span(w)+" "+w.svc+": "+c.dog+" ("+c.owner+")";}).join("\n")||"Sin servicios agendados.";
+  var X=panel("📅 Exportar agenda");X.appendChild(t3);
+  X.appendChild(el("div",{class:"acts",style:"margin-top:8px"},[el("button",{class:"btn sm",text:"Copiar agenda",onclick:function(){copy(t3,m4);}}),el("a",{class:"btn sm ghost",href:"https://wa.me/?text="+encodeURIComponent(t3.value),target:"_blank",rel:"noopener",text:"Enviar por WhatsApp"})]));X.appendChild(m4);v.appendChild(X);
+  var N=panel("📲 Usar como app en el teléfono");
+  N.appendChild(el("p",{class:"meta",text:"iPhone (Safari): botón Compartir, luego Agregar a inicio. Android (Chrome): menú de tres puntos, luego Agregar a pantalla de inicio. Abre siempre desde el mismo navegador para conservar tus datos."}));v.appendChild(N);
+  var Z=panel("Borrar todo");
+  Z.appendChild(el("button",{class:"btn sm ghost danger",text:armed==="del"?"Toca otra vez para borrar todo":"Borrar todos mis datos",onclick:function(){if(armed!=="del"){armed="del";render();return;}S={clients:[],walks:[],bank:"",pin:""};unlocked=false;save();armed="";tab="resumen";render();}}));v.appendChild(Z);
+}
+render();
+})();
+</script>
+</body>
+</html>
