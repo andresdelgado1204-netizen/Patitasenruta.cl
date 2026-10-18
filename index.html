@@ -189,5 +189,5 @@ async function cloudPass(){let o=document.getElementById("cpOld").value,n=docume
 function cloudMergeBak(){let raw=null;try{raw=localStorage.getItem(BAK_KEY)}catch{}if(!raw)return;let b=normalizedDb(JSON.parse(raw)),cs=new Set(db.clients.map(c=>c.id)),ws=new Set(db.walks.map(w=>w.id)),nc=0,nw=0;b.clients.forEach(c=>{if(!cs.has(c.id)){db.clients.push(c);nc++}});b.walks.forEach(w=>{if(!ws.has(w.id)){db.walks.push(w);nw++}});try{localStorage.removeItem(BAK_KEY)}catch{}save();toast(`Se agregaron ${nc} clientes y ${nw} servicios.`);render()}
 accessControl();addEventListener("visibilitychange",()=>{if(document.hidden&&hasPin())lockScreen()});if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
-</body>
+<script src="booking-inbox.js?v=1"></script></body>
 </html>
