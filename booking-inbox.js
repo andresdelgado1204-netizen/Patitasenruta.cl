@@ -146,6 +146,11 @@
       form.addEventListener('change',preview);form.addEventListener('input',preview);preview();
       form.addEventListener('submit', e=>{e.preventDefault();handle(r,card,'confirmed',readValues());});
       card.querySelector('.request-decline').addEventListener('click',()=>{if(confirm('¿Marcar esta solicitud como no aceptada?'))handle(r,card,'declined');});
+      const actions=document.createElement('div');actions.className='request-actions';
+      const accept=form.querySelector('button[type=submit]'),decline=card.querySelector('.request-decline');
+      accept.textContent='Confirmar y agendar';decline.textContent='No aceptar';
+      accept.setAttribute('aria-label','Confirmar y agendar');decline.style.marginTop='0';
+      actions.append(accept,decline);form.append(actions);
       panel.append(card);
     }
     document.getElementById('content').prepend(panel);
