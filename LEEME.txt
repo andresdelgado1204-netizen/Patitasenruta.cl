@@ -1,0 +1,15 @@
+PATITAS EN RUTA
+
+Agenda para registrar clientes y sus perros, programar paseos, trekking, hotel y pet sitter, y calcular cobros y comisiones.
+
+AGENDA
+Al agendar un servicio, la aplicación muestra la fecha, hora, duración y comisión correspondiente. En hotel, la comisión se calcula por noche. Los servicios quedan guardados en el navegador del equipo.
+
+RESPALDO Y TRASPASO
+Usa “Respaldo” para descargar los clientes y la agenda como archivo JSON. En otro equipo, abre la app y usa “Importar” para cargar ese archivo. La importación reemplaza los datos guardados en ese navegador.
+
+CALENDARIO DEL TELÉFONO
+En cada servicio, toca “Añadir al calendario” y abre el archivo .ics que se descarga. También puedes exportar todos los servicios agendados con “Exportar agenda”. Si editas un servicio después de agregarlo al calendario, expórtalo de nuevo.
+
+SEGURIDAD
+El bloqueo con clave de 6 números y la biometría son opcionales y se configuran por equipo. Los datos de clientes y la agenda se guardan localmente en cada navegador; el respaldo permite moverlos manualmente a otro dispositivo.
