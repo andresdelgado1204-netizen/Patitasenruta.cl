@@ -22,7 +22,7 @@ service cloud.firestore {
             || (d.area == 'Las Condes' && d.walker == 'Vannesa'))
           && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
           && d.period in ['Mañana','Tarde','Por coordinar']
-          && d.service in ['Paseo','Trekking','Hotel','Guardería']
+          && d['service'] in ['Paseo','Trekking','Hotel','Guardería']
           && d.status == 'pending' && d.source == 'patitas-web'
           && d.createdAt == request.time;
       }
