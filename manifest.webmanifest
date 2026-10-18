@@ -1,0 +1,10 @@
+{
+  "name": "Patitas en Ruta",
+  "short_name": "Patitas",
+  "lang": "es-CL",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f0c4",
+  "theme_color": "#f7f0c4",
+  "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]
+}
