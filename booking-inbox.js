@@ -71,12 +71,12 @@
     for (const r of requests) {
       const card=document.createElement('article'); card.className='walk';
       card.innerHTML=`<strong>${esc(r.dog)} · ${esc(r.service)}</strong><p class="hint">${esc(r.owner)} · ${esc(r.phone)}<br>${esc(r.area)} · ${esc(r.walker)}<br>Fecha solicitada: ${esc(r.date)} · ${esc(r.period)}</p>
-      <details><summary style="cursor:pointer;padding:10px 0">Revisar y confirmar</summary><form class="web-request-form" style="display:grid;gap:10px;margin-top:10px">
+      <details><summary style="cursor:pointer;padding:10px 0">Revisar y confirmar</summary><form class="web-request-form" style="display:grid;gap:8px;margin-top:10px">
       <label>Asignar a<select name="assignee" required>${accountOptions()}</select></label>
       <p class="hint">Puedes elegir cualquier cuenta registrada, incluidos los administradores.</p>
-      <label>Cómo elegir las fechas<select name="plan">${r.service==='Hotel'?'':'<option value="custom">Marcar fechas en el calendario</option>'}<option value="once">Un solo servicio</option>${r.service==='Hotel'?'':'<option value="week">Una semana (7 días)</option><option value="fortnight">Quince días</option><option value="month">Un mes desde la fecha de inicio</option>'}</select></label>
+      <label>Cómo elegir las fechas<select name="plan">${r.service==='Hotel'?'':'<option value="custom">Fechas a elección</option>'}<option value="once">Un solo servicio</option>${r.service==='Hotel'?'':'<option value="week">Una semana (7 días)</option><option value="fortnight">Quince días</option><option value="month">Un mes desde la fecha de inicio</option>'}</select></label>
       <label class="request-start-date">Fecha de inicio<input name="date" type="date" value="${esc(r.date)}" required></label>
-      <div class="request-calendar" ${r.service==='Hotel'?'hidden':''}></div>
+      <details class="request-calendar-toggle" ${r.service==='Hotel'?'hidden':''}><summary>Marcar fechas en el calendario <span>▾</span></summary><div class="request-calendar"></div></details>
       <fieldset class="request-weekdays" hidden style="border:1px solid #e6dba9;border-radius:12px;padding:12px"><legend>Días de paseo</legend><div style="display:flex;flex-wrap:wrap;gap:10px">${[[1,'Lun'],[2,'Mar'],[3,'Mié'],[4,'Jue'],[5,'Vie'],[6,'Sáb'],[0,'Dom']].map(([n,label])=>`<label style="display:flex;align-items:center;gap:5px;min-height:40px"><input type="checkbox" style="width:18px;height:18px;min-height:0" name="days" value="${n}" ${n===new Date(r.date+'T12:00:00').getDay()?'checked':''}>${label}</label>`).join('')}</div></fieldset>
       <label>Hora acordada<input name="time" type="time" required></label>
       <label>Duración en minutos<input name="minutes" type="number" min="1" max="1440" value="60" required></label>
@@ -105,7 +105,7 @@
       const preview=()=>{
         const mode=form.elements.plan.value;
         form.querySelector('.request-weekdays').hidden=['once','custom'].includes(mode);
-        calendar.hidden=mode!=='custom';
+        form.querySelector('.request-calendar-toggle').hidden=mode!=='custom';
         form.querySelector('.request-start-date').hidden=mode==='custom';
         form.elements.date.required=mode!=='custom';
         const line=form.querySelector('.request-plan-summary');
