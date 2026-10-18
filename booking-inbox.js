@@ -109,7 +109,21 @@
         form.querySelector('.request-start-date').hidden=mode==='custom';
         form.elements.date.required=mode!=='custom';
         const line=form.querySelector('.request-plan-summary');
-        try{const dates=scheduleDates(readValues());const units=r.service==='Hotel'?Math.max(1,+form.elements.nights.value||1):dates.length;line.textContent=`${dates.length} servicio(s): del ${dates[0]} al ${dates[dates.length-1]}. Total acordado: ${money(units*(+form.elements.price.value||0))}.`;}catch{line.textContent='Selecciona al menos una fecha o un día de paseo.';}
+        try{
+          const dates=scheduleDates(readValues());
+          const units=r.service==='Hotel'?Math.max(1,+form.elements.nights.value||1):dates.length;
+          const total=units*(+form.elements.price.value||0);
+          line.textContent=`${dates.length} servicio(s): del ${dates[0]} al ${dates[dates.length-1]}. Total acordado: ${money(total)}.`;
+          const account=accounts().get(form.elements.assignee.value);
+          if(account){
+            const admin=ADMINS.includes(String(account.email).toLowerCase());
+            const source=form.elements.assignee.value===cloud.user.uid?cloud.selfJson:account.json;
+            const targetData=normalizedDb(JSON.parse(source||'{}'));
+            const rate=admin?0:Math.max(0,+targetData.commissionByService[r.service==='Guardería'?'Pet sitter':r.service]||0);
+            const commission=units*rate;
+            line.textContent+=admin?' Administrador: sin comisión.':` Comisión: ${money(commission)}. Neto para el paseador: ${money(total-commission)}.`;
+          }
+        }catch{line.textContent='Selecciona al menos una fecha o un día de paseo.';}
       };
       const drawCalendar=()=>{
         const year=calendarMonth.getFullYear(),month=calendarMonth.getMonth();
@@ -165,12 +179,14 @@
             data.clients.push(customer);
           } else if(!customer.dogs.includes(request.dog)) customer.dogs.push(request.dog);
           const assignedEmail=accounts().get(target).email;
+          const assignedAdmin=ADMINS.includes(String(assignedEmail).toLowerCase());
+          const commissionRate=assignedAdmin?0:Math.max(0,+data.commissionByService[request.service==='Guardería'?'Pet sitter':request.service]||0);
           for(const date of dates) {
           const id='web-walk:'+r.id+':'+date;
           const duplicate=data.walks.some(w=>w.id===id||(w.status!=='Cancelado'&&w.clientId===customer.id&&w.dog===request.dog&&w.date===date&&w.time===values.time&&w.service===(request.service==='Guardería'?'Pet sitter':request.service)));
           if(!duplicate) data.walks.push({id,clientId:customer.id,dog:request.dog,date,time:values.time,
             service:request.service==='Guardería'?'Pet sitter':request.service,nights:request.service==="Hotel"?+values.nights:1,minutes:+values.minutes,price:+values.price,
-            status:'Agendado',paid:false,note:'Solicitud web · Asignado a: '+nameOf(assignedEmail)+' · Paseadora solicitada: '+request.walker,bookingRequestId:r.id});
+            status:'Agendado',paid:false,commissionExempt:assignedAdmin,commissionRate,note:'Solicitud web · Asignado a: '+nameOf(assignedEmail)+' · Paseadora solicitada: '+request.walker,bookingRequestId:r.id});
           }
           tx.set(userRef,{json:JSON.stringify(data),updatedAt:Date.now(),by:email,email:assignedEmail},{merge:true});
           handled.walkId='web-walk:'+r.id+':'+dates[0];
