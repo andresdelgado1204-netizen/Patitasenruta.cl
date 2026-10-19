@@ -60,7 +60,6 @@ header{max-width:1180px;margin-left:auto;margin-right:auto}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-window.addEventListener("error",function(e){let c=document.getElementById("content");if(c){let p=document.createElement("section");p.className="panel";p.textContent="Error al iniciar la aplicación: "+(e.message||"revisa la conexión");c.replaceChildren(p)}});
 var TAB_MODE=false;try{TAB_MODE=sessionStorage.getItem("patitas-tab-session")==="1";if(TAB_MODE)Object.defineProperty(window,"localStorage",{value:sessionStorage,configurable:true})}catch{}
 const KEY="paseos-perrunos-v1",PIN_KEY="patitas-access-pin-v1",BIO_KEY="patitas-access-bio-v1";let db={clients:[],walks:[]},view="home",filterDate=localDate(),reportMonth=localDate().slice(0,7),editWalk=null,editClient=null,toastTimer,securityOpen=false,schedClient=null,showClientForm=false;
 try{localStorage.removeItem("patitas-sync-v1");localStorage.removeItem("patitas-sync-base-v1")}catch{}
