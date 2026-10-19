@@ -115,7 +115,7 @@ header{padding-top:24px;padding-bottom:12px}
 
 /* Paletas de color y modo oscuro automático */
 :root{color-scheme:light}
-:root[data-theme="auto"],:root[data-theme="lavender"]{--purple:#59366b;--purple-soft:#f1edf4;--green:#536d3d}
+:root[data-theme="auto"],:root[data-theme="lavender"]{--bg:#f7f0c4;--card:#fffbea;--ink:#35143f;--muted:#806b7e;--line:#e6dba9;--purple:#3c164a;--purple-soft:#eee1ef;--mint:#e8efc9;--green:#5a7137;--orange:#fff1c4;--red:#a84551;--shadow:0 2px 12px #49331510}
 :root[data-theme="ocean"]{--purple:#22677a;--purple-soft:#e8f2f4;--green:#39705f}
 :root[data-theme="forest"]{--purple:#426447;--purple-soft:#edf3ed;--green:#426447}
 :root[data-theme="peach"]{--purple:#9a5548;--purple-soft:#f8eeeb;--green:#587054}
@@ -139,6 +139,23 @@ header{padding-top:24px;padding-bottom:12px}
  .nav button.active{color:#fff}
  .badge{background:var(--purple-soft);color:var(--purple)}
  .sheet-card{background:var(--card)}
+}
+
+/* Tipografía uniforme, paleta clásica y navegación inferior */
+body,button,input,select,textarea{font-family:Arial,Helvetica,sans-serif!important;font-feature-settings:"kern";letter-spacing:0}
+body{font-weight:400}
+button,.btn,.nav button{font-weight:600}
+.panel h2,.stat strong,.walk-title,.client strong{font-weight:700}
+:root[data-theme="auto"],:root[data-theme="lavender"]{--bg:#f7f0c4;--card:#fffbea;--ink:#35143f;--muted:#806b7e;--line:#e6dba9;--purple:#3c164a;--purple-soft:#eee1ef;--mint:#e8efc9;--green:#5a7137;--orange:#fff1c4;--red:#a84551;--shadow:0 2px 12px #49331510}
+@media(min-width:681px){
+ .nav{position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;z-index:30!important;display:flex!important;justify-content:center!important;gap:8px!important;margin:0!important;padding:8px 16px calc(8px + env(safe-area-inset-bottom))!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;background:var(--card)!important;box-shadow:0 -3px 16px #49331512!important;backdrop-filter:none!important}
+ .nav button{flex:0 1 150px!important;min-height:46px!important;padding:8px 16px!important;flex-direction:row!important;gap:7px!important;border-radius:999px!important;font-size:.9rem!important}
+ .nav-icon{font-size:1.05rem!important}
+ .wrap{padding-bottom:calc(112px + env(safe-area-inset-bottom))!important}
+}
+@media(max-width:680px){
+ .nav{background:var(--card)!important;border-top-color:var(--line)!important}
+ .nav button{font-family:Arial,Helvetica,sans-serif!important}
 }
 </style>
 </head>
@@ -263,7 +280,7 @@ return `<article class="bill-row"><div class="bill-row-top"><div><strong>🐕 ${
 return `${previousMonthBill(month)}<section class="panel billing-month"><div class="panel-head"><div><h2>Cobros del mes</h2><p class="hint">Paseos, extras y pagos recibidos.</p></div><input aria-label="Mes de cobros" id="reportsMonth" type="month" value="${month}"></div><div class="bill-totals"><div><span>Total del mes</span><strong>${money(bill.total)}</strong></div><div><span>Pagado</span><strong>${money(bill.paid)}</strong></div><div class="bill-pending"><span>Pendiente</span><strong>${money(bill.due)}</strong></div></div>${rows||'<div class="empty">Todavía no hay cobros para este mes.</div>'}<div class="bill-footer"><span>Total ${money(bill.total)} − pagado ${money(bill.paid)}</span><strong>Pendiente ${money(bill.due)}</strong></div></section>${admin?`${settings}${closePanel(month,bill)}`:""}${cancelledAnnex(month)}`
 }
 function adminDashboard(){if(!cloud||!cloud.admin)return "";let services=["Paseo","Trekking","Hotel","Pet sitter"],month=reportMonth,summary=commissionAcrossAccounts(month),ownBill=billingFor(month),settings=`<section class="panel"><div class="panel-head"><div><h2>⚙️ Comisión por servicio</h2><p class="hint">Define el monto fijo que Patitas en Ruta descuenta por cada servicio. En hotel, se aplica por noche.</p></div></div><div class="form-grid">${services.map(s=>`<div class="field"><label>➖ Comisión ${s==="Pet sitter"?"pet sitter":s.toLowerCase()} (CLP${s==="Hotel"?" por noche":" por servicio"})</label><input id="commission-${s.replace(" ","")}" type="number" min="0" step="100" inputmode="numeric" value="${+db.commissionByService[s]||0}" placeholder="0"></div>`).join("")}</div><div class="form-actions"><button class="btn" data-act="saveCommission">Guardar comisiones</button></div></section>`,entries=summary.entries.map(g=>`<div class="bill-payment"><span>🐕 ${esc(g.dogs||g.owner)} · ${esc(g.service)}<small>Cliente: ${esc(g.owner)} · ${esc(g.email)} · ${g.role}</small></span><b>${money(g.commission)}</b></div>`).join("");return `<section class="panel"><div class="panel-head"><div><h2>👑 Administración del equipo</h2><p class="hint">Solo aparecen perros y servicios con comisión. Los datos se mantienen separados y cada registro conserva el correo que lo creó.</p></div><input aria-label="Mes de administración" id="adminReportMonth" type="month" value="${month}"></div><div class="bill-totals"><div><span>Comisiones de Paseadoras/es</span><strong>${money(summary.walkerTotal)}</strong></div><div><span>Comisiones de Administradoras</span><strong>${money(summary.adminTotal)}</strong></div><div class="bill-pending"><span>Total del equipo</span><strong>${money(summary.total)}</strong></div></div><details class="commission-breakdown"><summary>Ver comisiones por cuenta y cliente (${entries?summary.entries.length:0})</summary>${entries||'<p class="hint">Todavía no hay comisiones registradas este mes.</p>'}<div class="bill-admin-line"><strong>Total de comisiones: ${money(summary.total)}</strong></div></details></section>${settings}${closePanel(month,ownBill)}${cancelledAnnex(month)}${teamWalksPanel()}${walkerPayPanel(month)}`;}
-const THEME_KEY="patitas-theme-v1";
+const THEME_KEY="patitas-theme-v2";
 function applyTheme(theme){let allowed=["auto","lavender","ocean","forest","peach"];if(!allowed.includes(theme))theme="auto";try{localStorage.setItem(THEME_KEY,theme)}catch{}document.documentElement.dataset.theme=theme}
 function currentTheme(){try{return localStorage.getItem(THEME_KEY)||"auto"}catch{return "auto"}}
 applyTheme(currentTheme());
