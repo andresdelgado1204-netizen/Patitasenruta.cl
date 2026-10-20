@@ -277,6 +277,17 @@ footer{font-size:.75rem!important;opacity:.8}
 input[type=month],#reportsMonth,#adminReportMonth{border:1px solid var(--soft-line)!important;border-radius:10px!important;background:var(--card)!important;padding:8px 10px!important;min-height:40px!important;font-size:.92rem!important;max-width:200px;color:var(--ink)}
 .bill-totals{gap:8px!important;margin:14px 0!important}.bill-totals>div{padding:11px 13px!important}.bill-totals span{font-size:.75rem!important}
 .bill-admin-line{border-radius:10px!important;font-size:.8rem!important}.bill-row{padding:13px 0!important;border-top-color:var(--soft-line)!important}
+.billing-month .panel-head,.panel-head:has(#adminReportMonth){flex-direction:row!important;align-items:flex-start!important;justify-content:space-between!important;flex-wrap:nowrap!important;gap:10px!important}
+.billing-month .panel-head>div,.panel-head:has(#adminReportMonth)>div{min-width:0}
+#reportsMonth,#adminReportMonth{width:auto!important;max-width:165px!important;flex:0 0 auto;min-height:36px!important;padding:6px 8px!important;font-size:.85rem!important}
+.bill-totals{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;margin:10px 0 12px!important}
+.bill-totals>div{padding:8px 10px!important;border-radius:10px!important}
+.bill-totals .bill-pending{grid-column:auto!important}
+.bill-totals span{font-size:.7rem!important}
+.bill-totals strong{font-size:.98rem!important;line-height:1.25}
+.bill-row-top strong{font-size:.95rem!important}.bill-row-top>b{font-size:.95rem!important}
+.bill-payment{font-size:.78rem!important;margin-top:6px!important}.bill-payment b{font-size:.85rem!important}
+.bill-footer strong{font-size:1rem!important}.previous-collected{font-size:1.3rem!important}
 .commission-breakdown{border-radius:12px!important}.commission-breakdown summary{font-weight:700!important;font-size:.9rem}
 @media(min-width:681px){.nav button{min-height:42px!important}}
 </style>
