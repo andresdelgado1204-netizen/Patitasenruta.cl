@@ -297,6 +297,19 @@ input[type=month],#reportsMonth,#adminReportMonth{border:1px solid var(--soft-li
 .bill-footer strong{font-size:1rem!important}.previous-collected{font-size:1.3rem!important}
 .commission-breakdown{border-radius:12px!important}.commission-breakdown summary{font-weight:700!important;font-size:.9rem}
 @media(min-width:681px){.nav button{min-height:42px!important}}
+
+/* Encabezado con nombre al centro */
+header{display:grid!important;grid-template-columns:1fr auto 1fr!important;align-items:center!important;gap:10px!important}
+header .brand{justify-self:start;grid-column:1}
+header .head-actions{grid-column:2;justify-self:center;margin:0!important;width:auto!important}
+header .who-name{max-width:60vw;text-align:center}
+
+/* Ajustes finales de pantalla */
+.stats{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))!important}
+@media(max-width:360px){header .who-name{font-size:1.1rem!important}.brand-mark{width:80px!important}.nav button{font-size:.58rem!important}}
+@media(min-width:1024px){#content{max-width:1100px;margin:0 auto}.panel{padding:18px 20px!important}.wfold>summary{padding:12px 16px!important}}
+@media(min-width:760px){.walk-phone{margin-top:-4px}.wc-actions .btn{flex:0 0 auto!important}.new-client-btn{width:auto}}
+@media(hover:none){.btn,.chip,.wfold>summary{min-height:40px}}
 </style>
 </head>
 <body>
