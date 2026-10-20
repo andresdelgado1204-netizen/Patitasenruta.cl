@@ -223,6 +223,62 @@ html:root[data-bg="negro"] body{background-image:url("data:image/svg+xml,%3Csvg%
 .lock{background-image:inherit}
 
 .sheet-card .panel-head{flex-direction:row!important;align-items:center;justify-content:space-between}.sheet-card .panel-head .btn{width:auto!important;flex:0 0 auto}.sub-badge{white-space:nowrap}
+
+/* ===== Estilo minimalista (solo apariencia) ===== */
+:root{--soft-line:color-mix(in srgb,var(--line) 70%,transparent)}
+body{letter-spacing:.005em}
+.panel,.stat{box-shadow:none!important;border:1px solid var(--soft-line)!important;border-radius:16px!important}
+.panel{padding:16px 16px!important;margin-bottom:12px!important}
+.panel h2{font-size:1rem!important;font-weight:700!important;letter-spacing:0}
+.panel-head{margin-bottom:10px}
+.hint,.panel p.hint,small.hint{font-size:.84rem!important;line-height:1.45}
+.btn{box-shadow:none!important;border-radius:10px!important;font-weight:600!important;letter-spacing:0}
+.btn:hover{transform:none!important;box-shadow:none!important;filter:brightness(1.05)}
+.btn.secondary{background:transparent!important;border:1px solid var(--soft-line)!important}
+.btn.small{padding:7px 12px!important;min-height:36px!important;font-size:.85rem!important}
+.btn.danger,.btn.secondary.danger{color:var(--red)!important}
+.field label{font-size:.78rem!important;font-weight:600!important;color:var(--muted)!important;letter-spacing:.01em}
+.field input,.field select,.field textarea,.filters input,.filters select,.admin-bar select,.cpass input{border:1px solid var(--soft-line)!important;border-radius:10px!important;box-shadow:none!important}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--purple)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--purple) 14%,transparent)!important}
+.total-box{background:var(--purple-soft)!important;border-color:transparent!important;font-weight:700!important}
+.badge{font-size:.72rem!important;padding:3px 8px!important;font-weight:600!important}
+.stats{gap:8px!important}
+.stat{padding:12px!important;background:var(--card)!important}
+.stat span{font-size:.78rem!important}
+.stat strong{font-size:1.15rem!important;margin-top:2px!important}
+.admin-bar{border:1px solid var(--soft-line)!important;box-shadow:none!important;padding:8px 12px!important;border-radius:14px!important}
+.admin-bar .hint{display:none}
+.wfold,.trow,.mrow,.xrow{border-color:var(--soft-line)!important;border-radius:12px!important;box-shadow:none!important}
+.wfold>summary{padding:10px 12px!important}
+.wfold[open]>summary{border-bottom-color:var(--soft-line)!important}
+.wc{border:0!important;box-shadow:none!important}
+.walk-address a{border-radius:10px!important;padding:9px 11px!important;min-height:0!important;font-size:.88rem!important}
+.wc-actions{gap:6px!important;margin-top:10px!important}
+.client{border-top-color:var(--soft-line)!important}
+.chip{border-width:1px!important;font-weight:600!important}
+.look-dot{width:36px!important;height:36px!important}
+.seg{border-color:var(--soft-line)!important;background:transparent!important}
+.seg button{font-weight:600!important;padding:8px 6px!important}
+.mday h3{font-size:.92rem!important}
+.bill-totals>div{border-radius:12px!important}
+.bill-totals strong{font-size:1.2rem!important}
+.commission-breakdown{border-color:var(--soft-line)!important}
+.sheet-card{box-shadow:0 -6px 24px #20152b14!important;border-color:var(--soft-line)!important}
+.toast{border-radius:12px!important;font-size:.9rem}
+header{padding-top:16px!important;padding-bottom:8px!important}
+.brand-mark{width:96px!important}
+.brand p{display:none!important}
+.who-name{font-size:1.3rem!important}
+.nav{box-shadow:none!important;border-top:1px solid var(--soft-line)!important}
+.nav button{font-weight:600!important}
+.nav button:not(.active){background:transparent!important}
+.empty{padding:18px 10px!important;font-size:.88rem}
+footer{font-size:.75rem!important;opacity:.8}
+input[type=month],#reportsMonth,#adminReportMonth{border:1px solid var(--soft-line)!important;border-radius:10px!important;background:var(--card)!important;padding:8px 10px!important;min-height:40px!important;font-size:.92rem!important;max-width:200px;color:var(--ink)}
+.bill-totals{gap:8px!important;margin:14px 0!important}.bill-totals>div{padding:11px 13px!important}.bill-totals span{font-size:.75rem!important}
+.bill-admin-line{border-radius:10px!important;font-size:.8rem!important}.bill-row{padding:13px 0!important;border-top-color:var(--soft-line)!important}
+.commission-breakdown{border-radius:12px!important}.commission-breakdown summary{font-weight:700!important;font-size:.9rem}
+@media(min-width:681px){.nav button{min-height:42px!important}}
 </style>
 </head>
 <body>
