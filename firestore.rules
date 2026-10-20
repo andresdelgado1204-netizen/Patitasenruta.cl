@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null &&
+        request.auth.token.email in ['andres@patitas.com', 'lauris@patitas.com', 'luz@patitas.com', 'vanessa@patitas.com'];
+    }
+    match /users/{uid} {
+      allow read, write: if request.auth != null && (request.auth.uid == uid || isAdmin());
+    }
+    // Public intake accepts only new, validated requests; no public reads.
+    match /bookingRequests/{id} {
+      function validRequest() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['owner','dog','phone','area','walker','date','period','service','status','source','createdAt'])
+          && d.keys().hasOnly(['owner','dog','phone','area','walker','date','period','service','status','source','createdAt'])
+          && d.owner is string && d.owner.size() > 0 && d.owner.size() <= 80
+          && d.dog is string && d.dog.size() > 0 && d.dog.size() <= 80
+          && d.phone is string && d.phone.matches('^[+]?[0-9]{8,15}$')
+          && ((d.area == 'Santiago' && d.walker == 'Luz')
+            || (d.area == 'Providencia' && d.walker == 'Lauris')
+            || (d.area == 'Las Condes' && d.walker == 'Vannesa'))
+          && d.date is string && d.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+          && d.period in ['Mañana','Tarde','Por coordinar']
+          && d['service'] in ['Paseo','Trekking','Hotel','Guardería']
+          && d.status == 'pending' && d.source == 'patitas-web'
+          && d.createdAt == request.time;
+      }
+      allow create: if validRequest();
+      allow read: if isAdmin();
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','handledAt','handledBy','walkId'])
+        && request.resource.data.status in ['confirmed','declined'];
+      allow delete: if false;
+    }
+
+  }
+}
